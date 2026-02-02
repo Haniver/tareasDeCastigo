@@ -100,6 +100,7 @@ class Alumno(Base):
 
     grupo = relationship("Grupo", back_populates="alumnos")
     progresos = relationship("ProgresoAlumno", back_populates="alumno", cascade="all, delete-orphan")
+    castigos_pendientes = relationship("CastigoPendiente", back_populates="alumno", cascade="all, delete-orphan")
 
     __table_args__ = (
         UniqueConstraint('grupo_id', 'nombre_completo', name='uq_alumno_grupo'),
@@ -124,3 +125,23 @@ class ProgresoAlumno(Base):
     __table_args__ = (
         UniqueConstraint('alumno_id', 'tarea_id', 'verbo_id', 'modo', 'tiempo', name='uq_progreso'),
     )
+
+
+class CastigoPendiente(Base):
+    """Guarda los errores pendientes de castigo de un alumno"""
+    __tablename__ = "castigos_pendientes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    alumno_id = Column(Integer, ForeignKey("alumnos.id", ondelete="CASCADE"), nullable=False)
+    tarea_id = Column(Integer, ForeignKey("tareas.id", ondelete="CASCADE"), nullable=False)
+    verbo_id = Column(Integer, ForeignKey("verbos.id", ondelete="CASCADE"), nullable=False)
+    modo = Column(String(20), nullable=False)
+    tiempo = Column(String(20), nullable=False)
+    persona = Column(String(20), nullable=False)
+    respuesta_incorrecta = Column(String(100), nullable=False)
+    respuesta_correcta = Column(String(100), nullable=False)
+    completado = Column(Boolean, default=False, nullable=False)
+
+    alumno = relationship("Alumno", back_populates="castigos_pendientes")
+    tarea = relationship("Tarea")
+    verbo = relationship("Verbo")

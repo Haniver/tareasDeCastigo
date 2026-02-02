@@ -344,3 +344,106 @@ def get_progreso_alumno(alumno_id: int, db: Session = Depends(get_db)):
         "porcentaje": round(porcentaje, 2),
         "tarea_completada": alumno.completado
     }
+
+
+@router.get("/{alumno_id}/castigo-pendiente", response_model=schemas.EstadoCastigo)
+def get_castigo_pendiente(alumno_id: int, db: Session = Depends(get_db)):
+    """Obtiene el estado de castigo pendiente del alumno"""
+    alumno = db.query(models.Alumno).filter(models.Alumno.id == alumno_id).first()
+    if not alumno:
+        raise HTTPException(status_code=404, detail="Alumno no encontrado")
+    
+    # Obtener la tarea
+    hoy = date.today()
+    tarea = db.query(models.Tarea).filter(
+        models.Tarea.grupo_id == alumno.grupo_id,
+        models.Tarea.fecha_limite >= hoy
+    ).first()
+    
+    if not tarea:
+        return schemas.EstadoCastigo(tiene_castigo_pendiente=False)
+    
+    # Buscar castigos pendientes no completados
+    castigos = db.query(models.CastigoPendiente).filter(
+        models.CastigoPendiente.alumno_id == alumno_id,
+        models.CastigoPendiente.tarea_id == tarea.id,
+        models.CastigoPendiente.completado == False
+    ).all()
+    
+    if not castigos:
+        return schemas.EstadoCastigo(tiene_castigo_pendiente=False)
+    
+    # Obtener el verbo
+    primer_castigo = castigos[0]
+    verbo = db.query(models.Verbo).filter(models.Verbo.id == primer_castigo.verbo_id).first()
+    
+    return schemas.EstadoCastigo(
+        tiene_castigo_pendiente=True,
+        verbo_id=primer_castigo.verbo_id,
+        infinitivo=verbo.infinitivo if verbo else None,
+        modo=primer_castigo.modo,
+        tiempo=primer_castigo.tiempo,
+        errores=[schemas.CastigoPendiente.model_validate(c) for c in castigos]
+    )
+
+
+@router.post("/{alumno_id}/guardar-castigos")
+def guardar_castigos_pendientes(alumno_id: int, datos: schemas.GuardarCastigosPendientes, db: Session = Depends(get_db)):
+    """Guarda los errores como castigos pendientes"""
+    alumno = db.query(models.Alumno).filter(models.Alumno.id == alumno_id).first()
+    if not alumno:
+        raise HTTPException(status_code=404, detail="Alumno no encontrado")
+    
+    # Obtener la tarea
+    hoy = date.today()
+    tarea = db.query(models.Tarea).filter(
+        models.Tarea.grupo_id == alumno.grupo_id,
+        models.Tarea.fecha_limite >= hoy
+    ).first()
+    
+    if not tarea:
+        raise HTTPException(status_code=400, detail="No hay tarea activa")
+    
+    # Eliminar castigos pendientes anteriores del mismo formulario
+    db.query(models.CastigoPendiente).filter(
+        models.CastigoPendiente.alumno_id == alumno_id,
+        models.CastigoPendiente.tarea_id == tarea.id,
+        models.CastigoPendiente.verbo_id == datos.verbo_id,
+        models.CastigoPendiente.modo == datos.modo,
+        models.CastigoPendiente.tiempo == datos.tiempo
+    ).delete()
+    
+    # Guardar los nuevos errores
+    for error in datos.errores:
+        castigo = models.CastigoPendiente(
+            alumno_id=alumno_id,
+            tarea_id=tarea.id,
+            verbo_id=datos.verbo_id,
+            modo=datos.modo,
+            tiempo=datos.tiempo,
+            persona=error.persona,
+            respuesta_incorrecta=error.respuesta_incorrecta,
+            respuesta_correcta=error.respuesta_correcta,
+            completado=False
+        )
+        db.add(castigo)
+    
+    db.commit()
+    return {"success": True}
+
+
+@router.post("/{alumno_id}/completar-castigo-individual/{castigo_id}")
+def completar_castigo_individual(alumno_id: int, castigo_id: int, db: Session = Depends(get_db)):
+    """Marca un castigo individual como completado"""
+    castigo = db.query(models.CastigoPendiente).filter(
+        models.CastigoPendiente.id == castigo_id,
+        models.CastigoPendiente.alumno_id == alumno_id
+    ).first()
+    
+    if not castigo:
+        raise HTTPException(status_code=404, detail="Castigo no encontrado")
+    
+    castigo.completado = True
+    db.commit()
+    
+    return {"success": True}

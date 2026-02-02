@@ -37,6 +37,9 @@ export const getFormulario = (alumnoId) => api.get(`/alumnos/${alumnoId}/formula
 export const enviarRespuesta = (alumnoId, data) => api.post(`/alumnos/${alumnoId}/respuesta`, data);
 export const completarCastigo = (alumnoId, data) => api.post(`/alumnos/${alumnoId}/completar-castigo`, data);
 export const getProgresoAlumno = (alumnoId) => api.get(`/alumnos/${alumnoId}/progreso`);
+export const getCastigoPendiente = (alumnoId) => api.get(`/alumnos/${alumnoId}/castigo-pendiente`);
+export const guardarCastigosPendientes = (alumnoId, data) => api.post(`/alumnos/${alumnoId}/guardar-castigos`, data);
+export const completarCastigoIndividual = (alumnoId, castigoId) => api.post(`/alumnos/${alumnoId}/completar-castigo-individual/${castigoId}`);
 
 // Admin
 export const adminLogin = (password) => api.post('/admin/login', { password });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getFormulario, enviarRespuesta, getAlumno, getProgresoAlumno } from '../api/client';
+import { getFormulario, enviarRespuesta, getAlumno, getProgresoAlumno, getCastigoPendiente, guardarCastigosPendientes } from '../api/client';
 import NoCopyInput from '../components/NoCopyInput';
 
 const PERSONA_LABELS = {
@@ -67,6 +67,32 @@ function Task() {
       
       if (alumnoRes.data.completado) {
         navigate(`/completado/${alumnoId}`);
+        return;
+      }
+      
+      // Verificar si hay castigos pendientes
+      const castigoRes = await getCastigoPendiente(alumnoId);
+      if (castigoRes.data.tiene_castigo_pendiente) {
+        // Redirigir al castigo con los errores pendientes
+        const errores = castigoRes.data.errores.map(e => ({
+          persona: e.persona,
+          respuesta_incorrecta: e.respuesta_incorrecta,
+          respuesta_correcta: e.respuesta_correcta,
+          castigo_id: e.id
+        }));
+        
+        navigate(`/castigo/${alumnoId}`, { 
+          state: { 
+            errores: errores,
+            formulario: {
+              verbo_id: castigoRes.data.verbo_id,
+              infinitivo: castigoRes.data.infinitivo,
+              modo: castigoRes.data.modo,
+              tiempo: castigoRes.data.tiempo
+            },
+            fromPendingPunishment: true
+          } 
+        });
         return;
       }
       
@@ -139,7 +165,22 @@ function Task() {
         // Correcto, cargar siguiente formulario
         await cargarFormulario();
       } else {
-        // Hay errores, ir a pantalla de castigo
+        // Hay errores, guardar castigos pendientes en el backend
+        const erroresConId = response.data.errores.map(e => ({
+          persona: e.persona,
+          respuesta_incorrecta: e.respuesta_incorrecta,
+          respuesta_correcta: e.respuesta_correcta
+        }));
+        
+        // Guardar en el backend
+        await guardarCastigosPendientes(alumnoId, {
+          verbo_id: formulario.verbo_id,
+          modo: formulario.modo,
+          tiempo: formulario.tiempo,
+          errores: erroresConId
+        });
+        
+        // Ir a pantalla de castigo
         navigate(`/castigo/${alumnoId}`, { 
           state: { 
             errores: response.data.errores,

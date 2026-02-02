@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { completarCastigo } from '../api/client';
+import { completarCastigo, completarCastigoIndividual } from '../api/client';
 import NoCopyInput from '../components/NoCopyInput';
 
 const PERSONA_LABELS = {
@@ -61,14 +61,22 @@ function Punishment() {
   };
 
   const handleSiguiente = async () => {
-    if (errorActual < errores.length - 1) {
-      // Siguiente error
-      setErrorActual(errorActual + 1);
-      inicializarRepeticiones(errores[errorActual + 1]);
-    } else {
-      // Todos los errores completados, marcar formulario como completado en el backend
-      setGuardando(true);
-      try {
+    setGuardando(true);
+    
+    try {
+      // Marcar el castigo actual como completado si tiene ID (viene de castigos pendientes)
+      const errorActualData = errores[errorActual];
+      if (errorActualData.castigo_id) {
+        await completarCastigoIndividual(alumnoId, errorActualData.castigo_id);
+      }
+      
+      if (errorActual < errores.length - 1) {
+        // Siguiente error
+        setErrorActual(errorActual + 1);
+        inicializarRepeticiones(errores[errorActual + 1]);
+        setGuardando(false);
+      } else {
+        // Todos los errores completados, marcar formulario como completado en el backend
         const response = await completarCastigo(alumnoId, {
           verbo_id: formulario.verbo_id,
           modo: formulario.modo,
@@ -81,9 +89,12 @@ function Punishment() {
         } else {
           navigate(`/tarea/${alumnoId}`, { state: { fromPunishment: true } });
         }
-      } catch (err) {
-        console.error('Error al guardar progreso:', err);
-        // Aún así, intentar continuar
+      }
+    } catch (err) {
+      console.error('Error al guardar progreso:', err);
+      setGuardando(false);
+      // Aún así, intentar continuar si es el último error
+      if (errorActual >= errores.length - 1) {
         navigate(`/tarea/${alumnoId}`, { state: { fromPunishment: true } });
       }
     }

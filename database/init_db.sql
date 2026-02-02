@@ -83,6 +83,20 @@ CREATE TABLE IF NOT EXISTS progreso_alumno (
     UNIQUE(alumno_id, tarea_id, verbo_id, modo, tiempo)
 );
 
+-- Tabla de castigos pendientes (errores que el alumno debe corregir)
+CREATE TABLE IF NOT EXISTS castigos_pendientes (
+    id SERIAL PRIMARY KEY,
+    alumno_id INTEGER NOT NULL REFERENCES alumnos(id) ON DELETE CASCADE,
+    tarea_id INTEGER NOT NULL REFERENCES tareas(id) ON DELETE CASCADE,
+    verbo_id INTEGER NOT NULL REFERENCES verbos(id) ON DELETE CASCADE,
+    modo VARCHAR(20) NOT NULL,
+    tiempo VARCHAR(20) NOT NULL,
+    persona VARCHAR(20) NOT NULL,
+    respuesta_incorrecta VARCHAR(100) NOT NULL,
+    respuesta_correcta VARCHAR(100) NOT NULL,
+    completado BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 -- Índices para mejorar rendimiento
 CREATE INDEX IF NOT EXISTS idx_conjugaciones_verbo ON conjugaciones(verbo_id);
 CREATE INDEX IF NOT EXISTS idx_conjugaciones_modo_tiempo ON conjugaciones(modo, tiempo);
@@ -92,6 +106,7 @@ CREATE INDEX IF NOT EXISTS idx_alumnos_grupo ON alumnos(grupo_id);
 CREATE INDEX IF NOT EXISTS idx_progreso_alumno ON progreso_alumno(alumno_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_grupo ON tareas(grupo_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_fecha ON tareas(fecha_limite);
+CREATE INDEX IF NOT EXISTS idx_castigos_alumno ON castigos_pendientes(alumno_id);
 
 -- Insertar verbo de ejemplo: "cantar"
 INSERT INTO verbos (infinitivo) VALUES ('cantar') ON CONFLICT DO NOTHING;

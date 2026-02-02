@@ -220,3 +220,40 @@ class ProgresoAlumnoAdmin(BaseModel):
 class VerboCreateConConjugaciones(BaseModel):
     infinitivo: str
     conjugaciones: List[ConjugacionCreate]
+
+
+# Castigo pendiente
+class CastigoPendiente(BaseModel):
+    id: int
+    verbo_id: int
+    modo: str
+    tiempo: str
+    persona: str
+    respuesta_incorrecta: str
+    respuesta_correcta: str
+    completado: bool
+
+    class Config:
+        from_attributes = True
+
+
+class CastigoPendienteCreate(BaseModel):
+    persona: str
+    respuesta_incorrecta: str
+    respuesta_correcta: str
+
+
+class GuardarCastigosPendientes(BaseModel):
+    verbo_id: int
+    modo: str
+    tiempo: str
+    errores: List[CastigoPendienteCreate]
+
+
+class EstadoCastigo(BaseModel):
+    tiene_castigo_pendiente: bool
+    verbo_id: Optional[int] = None
+    infinitivo: Optional[str] = None
+    modo: Optional[str] = None
+    tiempo: Optional[str] = None
+    errores: List[CastigoPendiente] = []
