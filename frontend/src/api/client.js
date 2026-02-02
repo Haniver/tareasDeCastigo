@@ -35,6 +35,7 @@ export const crearAlumno = (data) => api.post('/alumnos/', data);
 export const getAlumno = (id) => api.get(`/alumnos/${id}`);
 export const getFormulario = (alumnoId) => api.get(`/alumnos/${alumnoId}/formulario`);
 export const enviarRespuesta = (alumnoId, data) => api.post(`/alumnos/${alumnoId}/respuesta`, data);
+export const completarCastigo = (alumnoId, data) => api.post(`/alumnos/${alumnoId}/completar-castigo`, data);
 export const getProgresoAlumno = (alumnoId) => api.get(`/alumnos/${alumnoId}/progreso`);
 
 // Admin

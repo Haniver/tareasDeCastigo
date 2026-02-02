@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { completarCastigo } from '../api/client';
 import NoCopyInput from '../components/NoCopyInput';
 
 const PERSONA_LABELS = {
@@ -19,17 +20,20 @@ function Punishment() {
   const location = useLocation();
   
   const [errores, setErrores] = useState([]);
+  const [formulario, setFormulario] = useState(null);
   const [errorActual, setErrorActual] = useState(0);
   const [repeticiones, setRepeticiones] = useState([]);
   const [completados, setCompletados] = useState([]);
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
-    if (!location.state?.errores) {
+    if (!location.state?.errores || !location.state?.formulario) {
       navigate(`/tarea/${alumnoId}`);
       return;
     }
     
     setErrores(location.state.errores);
+    setFormulario(location.state.formulario);
     inicializarRepeticiones(location.state.errores[0]);
   }, []);
 
@@ -56,14 +60,32 @@ function Punishment() {
     return completados.every(c => c === true);
   };
 
-  const handleSiguiente = () => {
+  const handleSiguiente = async () => {
     if (errorActual < errores.length - 1) {
       // Siguiente error
       setErrorActual(errorActual + 1);
       inicializarRepeticiones(errores[errorActual + 1]);
     } else {
-      // Todos los errores completados, volver a la tarea
-      navigate(`/tarea/${alumnoId}`, { state: { fromPunishment: true } });
+      // Todos los errores completados, marcar formulario como completado en el backend
+      setGuardando(true);
+      try {
+        const response = await completarCastigo(alumnoId, {
+          verbo_id: formulario.verbo_id,
+          modo: formulario.modo,
+          tiempo: formulario.tiempo,
+          respuestas: [] // No necesitamos las respuestas, solo marcar como completado
+        });
+        
+        if (response.data.tarea_completada) {
+          navigate(`/completado/${alumnoId}`);
+        } else {
+          navigate(`/tarea/${alumnoId}`, { state: { fromPunishment: true } });
+        }
+      } catch (err) {
+        console.error('Error al guardar progreso:', err);
+        // Aún así, intentar continuar
+        navigate(`/tarea/${alumnoId}`, { state: { fromPunishment: true } });
+      }
     }
   };
 
@@ -114,10 +136,12 @@ function Punishment() {
 
       <button 
         className="btn btn-primary"
-        disabled={!todasCorrectas()}
+        disabled={!todasCorrectas() || guardando}
         onClick={handleSiguiente}
       >
-        {errorActual < errores.length - 1 
+        {guardando 
+          ? 'Guardando...'
+          : errorActual < errores.length - 1 
           ? `Siguiente palabra (${errorActual + 2}/${errores.length}) →`
           : 'Continuar con la tarea →'
         }
