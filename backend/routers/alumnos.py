@@ -246,6 +246,69 @@ def enviar_respuesta(alumno_id: int, respuestas: schemas.EnviarRespuestas, db: S
     )
 
 
+@router.post("/{alumno_id}/completar-castigo", response_model=schemas.ResultadoRespuesta)
+def completar_castigo(alumno_id: int, datos: schemas.EnviarRespuestas, db: Session = Depends(get_db)):
+    """Marca un formulario como completado después del castigo"""
+    alumno = db.query(models.Alumno).filter(models.Alumno.id == alumno_id).first()
+    if not alumno:
+        raise HTTPException(status_code=404, detail="Alumno no encontrado")
+    
+    # Obtener la tarea
+    hoy = date.today()
+    tarea = db.query(models.Tarea).filter(
+        models.Tarea.grupo_id == alumno.grupo_id,
+        models.Tarea.fecha_limite >= hoy
+    ).first()
+    
+    if not tarea:
+        raise HTTPException(status_code=400, detail="No hay tarea activa")
+    
+    # Marcar como completado
+    progreso = db.query(models.ProgresoAlumno).filter(
+        models.ProgresoAlumno.alumno_id == alumno_id,
+        models.ProgresoAlumno.tarea_id == tarea.id,
+        models.ProgresoAlumno.verbo_id == datos.verbo_id,
+        models.ProgresoAlumno.modo == datos.modo,
+        models.ProgresoAlumno.tiempo == datos.tiempo
+    ).first()
+    
+    if not progreso:
+        progreso = models.ProgresoAlumno(
+            alumno_id=alumno_id,
+            tarea_id=tarea.id,
+            verbo_id=datos.verbo_id,
+            modo=datos.modo,
+            tiempo=datos.tiempo,
+            completado=True
+        )
+        db.add(progreso)
+    else:
+        progreso.completado = True
+    
+    db.commit()
+    
+    # Obtener siguiente formulario
+    siguiente = obtener_siguiente_formulario(alumno, tarea, db)
+    
+    if not siguiente:
+        # Tarea completada
+        alumno.completado = True
+        db.commit()
+        return schemas.ResultadoRespuesta(
+            correcto=True,
+            errores=[],
+            siguiente_formulario=None,
+            tarea_completada=True
+        )
+    
+    return schemas.ResultadoRespuesta(
+        correcto=True,
+        errores=[],
+        siguiente_formulario=siguiente,
+        tarea_completada=False
+    )
+
+
 @router.get("/{alumno_id}/progreso")
 def get_progreso_alumno(alumno_id: int, db: Session = Depends(get_db)):
     """Obtiene el progreso del alumno"""
