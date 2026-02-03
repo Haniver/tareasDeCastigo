@@ -1,14 +1,10 @@
 # Instrucciones de Despliegue
 
-## Requisitos
-- Acceso SSH al servidor
-- Permisos sudo
-- Git configurado
-
-## Servidor de Producción
+## Información del Servidor
 - **URL:** https://tareadecastigo.work
-- **IP:** 104.251.217.178
-- **Usuario:** lucio
+- **IP Pública:** 104.251.217.178
+
+> **Nota:** El entorno de desarrollo y producción es el mismo servidor. Los cambios se aplican directamente sin necesidad de conexión remota.
 
 ---
 
