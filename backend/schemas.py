@@ -211,6 +211,7 @@ class ProgresoAlumnoAdmin(BaseModel):
     alumno_id: int
     nombre_completo: str
     grupo_nombre: str
+    fecha_limite: date
     total_formularios: int
     formularios_completados: int
     porcentaje: float

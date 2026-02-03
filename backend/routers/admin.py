@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import date
+from datetime import date, timedelta
 
 import models
 import schemas
@@ -22,44 +22,33 @@ def admin_login(login: schemas.AdminLogin, db: Session = Depends(get_db)):
     if login.password != config.valor:
         return schemas.AdminLoginResponse(success=False, message="Contraseña incorrecta")
     
-    # Verificar si hay que hacer limpieza anual
-    realizar_limpieza_anual(db)
+    # Limpiar tareas antiguas (más de 45 días después de su fecha límite)
+    realizar_limpieza_tareas_antiguas(db)
     
     return schemas.AdminLoginResponse(success=True, message="Login exitoso")
 
 
-def realizar_limpieza_anual(db: Session):
-    """Limpia tareas, grupos y alumnos si es el primer login después del 29 de julio"""
+def realizar_limpieza_tareas_antiguas(db: Session):
+    """Elimina tareas cuya fecha límite haya pasado hace más de 45 días, junto con sus alumnos asociados"""
     hoy = date.today()
+    fecha_corte = hoy - timedelta(days=45)
     
-    # Obtener fecha del último reset
-    config_reset = db.query(models.Config).filter(models.Config.clave == "ultimo_reset_anual").first()
+    # Buscar tareas antiguas
+    tareas_antiguas = db.query(models.Tarea).filter(
+        models.Tarea.fecha_limite < fecha_corte
+    ).all()
     
-    if not config_reset:
-        # Crear configuración si no existe
-        config_reset = models.Config(clave="ultimo_reset_anual", valor="2025-07-29")
-        db.add(config_reset)
-        db.commit()
-    
-    ultimo_reset = date.fromisoformat(config_reset.valor)
-    
-    # Calcular la fecha límite para el reset de este año
-    anio_actual = hoy.year
-    fecha_reset_este_anio = date(anio_actual, 7, 29)
-    
-    # Si ya pasó el 29 de julio de este año y el último reset fue antes
-    if hoy >= fecha_reset_este_anio and ultimo_reset < fecha_reset_este_anio:
-        # Eliminar alumnos (esto también elimina su progreso por cascade)
-        db.query(models.Alumno).delete()
+    for tarea in tareas_antiguas:
+        # Eliminar alumnos del grupo asociado a esta tarea
+        # (el progreso y castigos pendientes se eliminan en cascada)
+        db.query(models.Alumno).filter(
+            models.Alumno.grupo_id == tarea.grupo_id
+        ).delete()
         
-        # Eliminar tareas (esto también elimina tarea_verbos y tarea_tiempos por cascade)
-        db.query(models.Tarea).delete()
-        
-        # Eliminar grupos
-        db.query(models.Grupo).delete()
-        
-        # Actualizar fecha de último reset
-        config_reset.valor = hoy.isoformat()
+        # Eliminar la tarea (tarea_verbos, tarea_tiempos y progresos se eliminan en cascada)
+        db.delete(tarea)
+    
+    if tareas_antiguas:
         db.commit()
 
 
@@ -98,6 +87,7 @@ def get_progreso_todos(db: Session = Depends(get_db)):
             alumno_id=alumno.id,
             nombre_completo=alumno.nombre_completo,
             grupo_nombre=grupo.nombre if grupo else "Sin grupo",
+            fecha_limite=tarea.fecha_limite,
             total_formularios=total,
             formularios_completados=completados,
             porcentaje=round(porcentaje, 2),

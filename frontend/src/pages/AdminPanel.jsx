@@ -836,15 +836,17 @@ function ProgresoTab({ progreso }) {
               <tr>
                 <th>Nombre</th>
                 <th>Grupo</th>
+                <th>Fecha límite</th>
                 <th>Progreso</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody>
               {progreso.map(p => (
-                <tr key={p.alumno_id}>
+                <tr key={`${p.alumno_id}-${p.fecha_limite}`}>
                   <td>{p.nombre_completo}</td>
                   <td>{p.grupo_nombre}</td>
+                  <td>{new Date(p.fecha_limite).toLocaleDateString('es-MX')}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div className="progress-bar" style={{ width: '150px', height: '15px' }}>
