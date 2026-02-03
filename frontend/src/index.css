@@ -176,17 +176,21 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .conjugation-item label {
-  min-width: 80px;
+  min-width: 70px;
+  flex-shrink: 0;
   color: #666;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .conjugation-item input {
   flex: 1;
-  padding: 10px 15px;
+  min-width: 0;
+  padding: 10px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
