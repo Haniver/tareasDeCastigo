@@ -5,8 +5,9 @@ from typing import List
 import models
 import schemas
 from database import get_db
+from auth import require_admin
 
-router = APIRouter(prefix="/api/tareas", tags=["tareas"])
+router = APIRouter(prefix="/api/tareas", tags=["tareas"], dependencies=[Depends(require_admin)])
 
 
 @router.get("/", response_model=List[schemas.Tarea])

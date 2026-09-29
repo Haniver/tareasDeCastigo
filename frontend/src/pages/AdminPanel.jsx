@@ -60,7 +60,7 @@ function AdminPanel() {
 
   useEffect(() => {
     // Verificar autenticación
-    if (!localStorage.getItem('adminAuth')) {
+    if (!localStorage.getItem('adminToken')) {
       navigate('/admin');
       return;
     }
@@ -89,7 +89,7 @@ function AdminPanel() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
+    localStorage.removeItem('adminToken');
     navigate('/admin');
   };
 

@@ -5,8 +5,10 @@ from typing import List
 import models
 import schemas
 from database import get_db
+from auth import require_admin
 
-router = APIRouter(prefix="/api/verbos", tags=["verbos"])
+# Solo la maestra: las conjugaciones son las respuestas correctas
+router = APIRouter(prefix="/api/verbos", tags=["verbos"], dependencies=[Depends(require_admin)])
 
 
 @router.get("/", response_model=List[schemas.Verbo])

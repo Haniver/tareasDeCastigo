@@ -24,13 +24,15 @@ function AdminLogin() {
       
       if (response.data.success) {
         // Guardar sesión en localStorage
-        localStorage.setItem('adminAuth', 'true');
+        localStorage.setItem('adminToken', response.data.token);
         navigate('/admin/panel');
       } else {
         setError(response.data.message || 'Contraseña incorrecta');
       }
     } catch (err) {
-      setError('Error al iniciar sesión');
+      setError(err.response?.status === 429
+        ? 'Demasiados intentos. Espera un minuto y vuelve a intentar.'
+        : 'Error al iniciar sesión');
     }
     
     setLoading(false);

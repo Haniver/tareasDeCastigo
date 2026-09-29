@@ -204,6 +204,7 @@ class AdminLogin(BaseModel):
 class AdminLoginResponse(BaseModel):
     success: bool
     message: str
+    token: Optional[str] = None
 
 
 # Progreso de alumno para el admin

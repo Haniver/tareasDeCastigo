@@ -6,6 +6,7 @@ from datetime import date, timedelta
 import models
 import schemas
 from database import get_db
+from auth import crear_token, obtener_password_hash, require_admin, verificar_password
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -13,19 +14,19 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 @router.post("/login", response_model=schemas.AdminLoginResponse)
 def admin_login(login: schemas.AdminLogin, db: Session = Depends(get_db)):
     """Autenticación de la maestra"""
-    # Obtener contraseña de la BD
-    config = db.query(models.Config).filter(models.Config.clave == "password_admin").first()
+    # Obtener contraseña de la BD (hasheada; se configura con set_admin_password.py)
+    password_hash = obtener_password_hash(db)
     
-    if not config:
+    if not password_hash:
         raise HTTPException(status_code=500, detail="Configuración no encontrada")
     
-    if login.password != config.valor:
+    if not verificar_password(login.password, password_hash):
         return schemas.AdminLoginResponse(success=False, message="Contraseña incorrecta")
     
     # Limpiar tareas antiguas (más de 45 días después de su fecha límite)
     realizar_limpieza_tareas_antiguas(db)
     
-    return schemas.AdminLoginResponse(success=True, message="Login exitoso")
+    return schemas.AdminLoginResponse(success=True, message="Login exitoso", token=crear_token(password_hash))
 
 
 def realizar_limpieza_tareas_antiguas(db: Session):
@@ -52,7 +53,7 @@ def realizar_limpieza_tareas_antiguas(db: Session):
         db.commit()
 
 
-@router.get("/progreso", response_model=List[schemas.ProgresoAlumnoAdmin])
+@router.get("/progreso", response_model=List[schemas.ProgresoAlumnoAdmin], dependencies=[Depends(require_admin)])
 def get_progreso_todos(db: Session = Depends(get_db)):
     """Obtiene el progreso de todos los alumnos"""
     alumnos = db.query(models.Alumno).all()
@@ -95,18 +96,3 @@ def get_progreso_todos(db: Session = Depends(get_db)):
         ))
     
     return resultado
-
-
-@router.put("/password")
-def cambiar_password(nuevo_password: str, db: Session = Depends(get_db)):
-    """Cambia la contraseña de admin"""
-    config = db.query(models.Config).filter(models.Config.clave == "password_admin").first()
-    
-    if not config:
-        config = models.Config(clave="password_admin", valor=nuevo_password)
-        db.add(config)
-    else:
-        config.valor = nuevo_password
-    
-    db.commit()
-    return {"message": "Contraseña actualizada"}

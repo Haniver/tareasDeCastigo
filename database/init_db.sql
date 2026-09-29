@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS config (
     valor TEXT NOT NULL
 );
 
--- Insertar contraseña por defecto de la maestra
-INSERT INTO config (clave, valor) VALUES ('password_admin', 'maestra123') ON CONFLICT DO NOTHING;
+-- La contraseña de la maestra se configura con backend/set_admin_password.py (se guarda hasheada)
 INSERT INTO config (clave, valor) VALUES ('ultimo_reset_anual', '2025-07-29') ON CONFLICT DO NOTHING;
 
 -- Tabla de verbos

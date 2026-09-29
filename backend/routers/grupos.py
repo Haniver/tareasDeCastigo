@@ -6,6 +6,7 @@ from datetime import date
 import models
 import schemas
 from database import get_db
+from auth import require_admin
 
 router = APIRouter(prefix="/api/grupos", tags=["grupos"])
 
@@ -20,7 +21,7 @@ def get_grupos_activos(db: Session = Depends(get_db)):
     return grupos
 
 
-@router.get("/todos", response_model=List[schemas.Grupo])
+@router.get("/todos", response_model=List[schemas.Grupo], dependencies=[Depends(require_admin)])
 def get_todos_grupos(db: Session = Depends(get_db)):
     """Obtiene todos los grupos (para admin)"""
     return db.query(models.Grupo).all()
@@ -43,7 +44,7 @@ def get_alumnos_grupo(grupo_id: int, db: Session = Depends(get_db)):
     return alumnos
 
 
-@router.post("/", response_model=schemas.Grupo)
+@router.post("/", response_model=schemas.Grupo, dependencies=[Depends(require_admin)])
 def crear_grupo(grupo: schemas.GrupoCreate, db: Session = Depends(get_db)):
     db_grupo = db.query(models.Grupo).filter(
         models.Grupo.nombre == grupo.nombre
@@ -58,7 +59,7 @@ def crear_grupo(grupo: schemas.GrupoCreate, db: Session = Depends(get_db)):
     return nuevo_grupo
 
 
-@router.put("/{grupo_id}", response_model=schemas.Grupo)
+@router.put("/{grupo_id}", response_model=schemas.Grupo, dependencies=[Depends(require_admin)])
 def actualizar_grupo(grupo_id: int, grupo: schemas.GrupoCreate, db: Session = Depends(get_db)):
     db_grupo = db.query(models.Grupo).filter(models.Grupo.id == grupo_id).first()
     if not db_grupo:
@@ -78,7 +79,7 @@ def actualizar_grupo(grupo_id: int, grupo: schemas.GrupoCreate, db: Session = De
     return db_grupo
 
 
-@router.delete("/{grupo_id}")
+@router.delete("/{grupo_id}", dependencies=[Depends(require_admin)])
 def eliminar_grupo(grupo_id: int, db: Session = Depends(get_db)):
     db_grupo = db.query(models.Grupo).filter(models.Grupo.id == grupo_id).first()
     if not db_grupo:

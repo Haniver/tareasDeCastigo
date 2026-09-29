@@ -7,6 +7,29 @@ const api = axios.create({
   },
 });
 
+// Sesión de la maestra: el token se manda en cada petición
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Si el token expiró o no es válido, regresar al login
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('adminToken');
+      if (window.location.pathname.startsWith('/admin/')) {
+        window.location.href = '/admin';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Grupos
 export const getGruposActivos = () => api.get('/grupos/');
 export const getTodosGrupos = () => api.get('/grupos/todos');
