@@ -2,85 +2,56 @@
 
 ## Información del Servidor
 - **URL:** https://tareadecastigo.work
-- **IP Pública:** 104.251.217.178
+- **Proveedor:** VPSDime
+- **IP Pública:** 104.251.211.214
+- **Sistema:** Ubuntu 26.04 LTS
+- **Ruta de la app:** `/home/lucio/Proyectos/tareaDeCastigo` (usuario `lucio`, sin login)
 
-> **Nota:** El entorno de desarrollo y producción es el mismo servidor. Los cambios se aplican directamente sin necesidad de conexión remota.
+Se entra al servidor como root con una llave SSH dedicada (sin passphrase):
+
+```powershell
+ssh -i $env:USERPROFILE\.ssh\tareadecastigo_ed25519 root@104.251.211.214
+```
 
 ---
 
 ## Desplegar Cambios
 
-### 1. Obtener últimos cambios del repositorio
-```bash
-cd /home/lucio/Proyectos/tareaDeCastigo
-git pull origin main
+1. Hacer commit y push a `main` desde la máquina de desarrollo.
+2. Ejecutar el script de despliegue en el servidor:
+
+```powershell
+ssh -i $env:USERPROFILE\.ssh\tareadecastigo_ed25519 root@104.251.211.214 /home/lucio/Proyectos/tareaDeCastigo/deploy.sh
 ```
 
-### 2. Reconstruir el frontend
-```bash
-cd /home/lucio/Proyectos/tareaDeCastigo/frontend
-npm install  # Solo si hay nuevas dependencias
-npm run build
-```
+`deploy.sh` hace `git pull`, instala dependencias del backend, ejecuta `database/init_db.sql`
+(es idempotente: solo agrega lo que falte), compila el frontend y reinicia el backend.
 
-### 3. Reiniciar el backend
-```bash
-sudo systemctl restart tareadecastigo
-```
+> Como `init_db.sql` se ejecuta en cada despliegue, un verbo que venga en ese archivo y se
+> borre desde el panel de admin volverá a aparecer en el siguiente despliegue.
 
-### 4. Verificar que todo funcione
+### Verificar
 ```bash
-# Verificar estado del servicio
-sudo systemctl status tareadecastigo
-
-# Probar la API
+systemctl status tareadecastigo
 curl https://tareadecastigo.work/api/health
-
-# Probar el frontend
-curl -s -o /dev/null -w "%{http_code}" https://tareadecastigo.work
 ```
 
 ---
 
-## Comandos Útiles
-
-### Servicios
+## Comandos Útiles (en el servidor, como root)
 
 | Acción | Comando |
 |--------|---------|
-| Ver estado del backend | `sudo systemctl status tareadecastigo` |
-| Reiniciar backend | `sudo systemctl restart tareadecastigo` |
-| Detener backend | `sudo systemctl stop tareadecastigo` |
-| Iniciar backend | `sudo systemctl start tareadecastigo` |
-| Ver logs del backend | `sudo journalctl -u tareadecastigo -f` |
-| Recargar nginx | `sudo systemctl reload nginx` |
-| Ver logs de nginx | `sudo tail -f /var/log/nginx/error.log` |
+| Ver estado del backend | `systemctl status tareadecastigo` |
+| Reiniciar backend | `systemctl restart tareadecastigo` |
+| Ver logs del backend | `journalctl -u tareadecastigo -f` |
+| Recargar nginx | `systemctl reload nginx` |
+| Ver logs de nginx | `tail -f /var/log/nginx/error.log` |
+| Conectar a la BD | `sudo -u lucio psql -d tareasDeCastigo` |
+| Respaldar la BD | `sudo -u lucio pg_dump tareasDeCastigo > respaldo.sql` |
 
-### Base de Datos
-
-```bash
-# Conectar a PostgreSQL
-PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo
-
-# Ejecutar script SQL
-PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo -f database/init_db.sql
-```
-
----
-
-## Migraciones de Base de Datos
-
-Si hay cambios en el esquema de la base de datos:
-
-```bash
-cd /home/lucio/Proyectos/tareaDeCastigo
-PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo -f database/init_db.sql
-```
-
-O ejecutar comandos SQL específicos:
-```bash
-PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo -c "TU_COMANDO_SQL_AQUÍ"
-```
+El usuario `lucio` entra a PostgreSQL por autenticación *peer* (sin contraseña) desde el propio
+servidor. La contraseña que usa el backend está solo en `backend/.env` en el servidor.
 
 ---
 
@@ -88,10 +59,16 @@ PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo -c "TU_COMANDO_SQL_
 
 | Archivo | Ubicación |
 |---------|-----------|
-| Servicio systemd | `/etc/systemd/system/tareadecastigo.service` |
+| Servicio systemd | `/etc/systemd/system/tareadecastigo.service` (copia de `tareadecastigo.service`) |
 | Configuración nginx | `/etc/nginx/sites-available/tareadecastigo.work` |
 | Variables de entorno | `/home/lucio/Proyectos/tareaDeCastigo/backend/.env` |
 | Frontend compilado | `/home/lucio/Proyectos/tareaDeCastigo/frontend/dist/` |
+
+Si se modifica `tareadecastigo.service` en el repo, hay que volver a copiarlo:
+```bash
+cp /home/lucio/Proyectos/tareaDeCastigo/tareadecastigo.service /etc/systemd/system/
+systemctl daemon-reload && systemctl restart tareadecastigo
+```
 
 ---
 
@@ -99,69 +76,66 @@ PGPASSWORD=Lqw9XumKrevwYt3y psql -U lucio -d tareasDeCastigo -c "TU_COMANDO_SQL_
 
 ### El backend no inicia (puerto ocupado)
 ```bash
-sudo fuser -k 8004/tcp
-sudo systemctl restart tareadecastigo
-```
-
-### Error de permisos en nginx
-```bash
-chmod 755 /home/lucio
-chmod -R 755 /home/lucio/Proyectos/tareaDeCastigo
-sudo systemctl reload nginx
+fuser -k 8004/tcp
+systemctl restart tareadecastigo
 ```
 
 ### Renovar certificado SSL
+Certbot lo renueva solo (timer de systemd). Para probar la renovación:
 ```bash
-sudo certbot renew
-```
-
-### Ver errores del backend en tiempo real
-```bash
-sudo journalctl -u tareadecastigo -f --no-pager
+certbot renew --dry-run
 ```
 
 ---
 
-## Despliegue Completo (desde cero)
+## Despliegue Completo (desde cero, como root)
 
 ```bash
-# 1. Clonar repositorio
-git clone https://github.com/Haniver/tareasDeCastigo.git
-cd tareasDeCastigo
+# 1. Paquetes
+apt-get install -y postgresql nginx python3-venv git nodejs npm certbot python3-certbot-nginx ufw
 
-# 2. Configurar backend
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Editar .env con las credenciales correctas
+# 2. Usuario de la app
+useradd --create-home --shell /usr/sbin/nologin lucio
+chmod 755 /home/lucio
 
-# 3. Configurar base de datos
-PGPASSWORD=tu_password psql -U lucio -d tareasDeCastigo -f ../database/init_db.sql
+# 3. Base de datos (usar una contraseña generada, p. ej. con: openssl rand -hex 24)
+sudo -u postgres psql -c "CREATE ROLE lucio LOGIN PASSWORD '<contraseña>';"
+sudo -u postgres psql -c "CREATE DATABASE \"tareasDeCastigo\" OWNER lucio;"
 
-# 4. Construir frontend
-cd ../frontend
-npm install
-npm run build
+# 4. Código
+sudo -u lucio mkdir -p /home/lucio/Proyectos
+sudo -u lucio git clone https://github.com/Haniver/tareasDeCastigo.git /home/lucio/Proyectos/tareaDeCastigo
+cd /home/lucio/Proyectos/tareaDeCastigo
 
-# 5. Instalar servicios
-sudo cp ../tareadecastigo.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now tareadecastigo
+# 5. Backend
+sudo -u lucio python3 -m venv backend/venv
+sudo -u lucio cp backend/.env.example backend/.env   # poner DB_USER=lucio y la contraseña
+chmod 600 backend/.env
 
-# 6. Configurar nginx
-sudo cp ../nginx-tareadecastigo.conf /etc/nginx/sites-available/tareadecastigo.work
-sudo ln -sf /etc/nginx/sites-available/tareadecastigo.work /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
+# 6. Servicio systemd
+cp tareadecastigo.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable tareadecastigo
 
-# 7. Obtener certificado SSL
-sudo certbot --nginx -d tareadecastigo.work -d www.tareadecastigo.work
+# 7. Instala dependencias, carga la BD, compila el frontend y arranca el backend
+./deploy.sh
+
+# 8. nginx (primero HTTP, luego certbot agrega HTTPS)
+cp nginx-tareadecastigo-temp.conf /etc/nginx/sites-available/tareadecastigo.work
+ln -sf /etc/nginx/sites-available/tareadecastigo.work /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+
+# 9. Firewall
+ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
+
+# 10. SSL (cuando el DNS ya apunte al servidor)
+certbot --nginx -d tareadecastigo.work -d www.tareadecastigo.work
 ```
 
 ---
 
-## Credenciales
+## Panel de Administración
 
-- **Panel Admin:** https://tareadecastigo.work/admin
-- **Contraseña Admin:** `maestra123` (almacenada en tabla `config`)
+- **URL:** https://tareadecastigo.work/admin
+- La contraseña se guarda en la tabla `config` (clave `password_admin`).
