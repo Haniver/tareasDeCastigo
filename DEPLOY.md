@@ -109,7 +109,7 @@ cd /home/lucio/Proyectos/tareaDeCastigo
 
 # 5. Backend
 sudo -u lucio python3 -m venv backend/venv
-sudo -u lucio cp backend/.env.example backend/.env   # poner DB_USER=lucio y la contraseña
+sudo -u lucio cp backend/.env.example backend/.env   # DB_USER=lucio, la contraseña y SECRET_KEY (openssl rand -hex 32)
 chmod 600 backend/.env
 
 # 6. Servicio systemd
@@ -120,7 +120,7 @@ systemctl enable tareadecastigo
 # 7. Instala dependencias, carga la BD, compila el frontend y arranca el backend
 ./deploy.sh
 
-# 8. nginx (primero HTTP, luego certbot agrega HTTPS)
+# 8. nginx solo HTTP (para que certbot pueda validar el dominio)
 cp nginx-tareadecastigo-temp.conf /etc/nginx/sites-available/tareadecastigo.work
 ln -sf /etc/nginx/sites-available/tareadecastigo.work /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
@@ -129,13 +129,28 @@ nginx -t && systemctl reload nginx
 # 9. Firewall
 ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
 
-# 10. SSL (cuando el DNS ya apunte al servidor)
-certbot --nginx -d tareadecastigo.work -d www.tareadecastigo.work
+# 10. SSL (cuando el DNS ya apunte al servidor) y config final con HTTPS
+certbot certonly --nginx --agree-tos --register-unsafely-without-email -d tareadecastigo.work -d www.tareadecastigo.work
+cp nginx-tareadecastigo.conf /etc/nginx/sites-available/tareadecastigo.work
+nginx -t && systemctl reload nginx
+
+# 11. Contraseña del panel de admin
+sudo -u lucio backend/venv/bin/python backend/set_admin_password.py
 ```
+
+Si se modifica `nginx-tareadecastigo.conf` en el repo, hay que volver a copiarlo como en el paso 10.
 
 ---
 
 ## Panel de Administración
 
 - **URL:** https://tareadecastigo.work/admin
-- La contraseña se guarda en la tabla `config` (clave `password_admin`).
+- La contraseña se guarda hasheada en la tabla `config` (clave `password_admin`).
+- La sesión dura 7 días. Cambiar la contraseña cierra todas las sesiones abiertas.
+- nginx permite 5 intentos de login por minuto por IP.
+
+Para poner o cambiar la contraseña (pide la nueva contraseña dos veces):
+
+```powershell
+ssh -t -i $env:USERPROFILE\.ssh	areadecastigo_ed25519 root@104.251.211.214 "sudo -u lucio /home/lucio/Proyectos/tareaDeCastigo/backend/venv/bin/python /home/lucio/Proyectos/tareaDeCastigo/backend/set_admin_password.py"
+```
