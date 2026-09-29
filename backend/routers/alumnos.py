@@ -284,9 +284,19 @@ def completar_castigo(alumno_id: int, datos: schemas.EnviarRespuestas, db: Sessi
         db.add(progreso)
     else:
         progreso.completado = True
-    
+
+    # Cerrar los castigos pendientes de este formulario para que no se vuelvan a pedir
+    db.query(models.CastigoPendiente).filter(
+        models.CastigoPendiente.alumno_id == alumno_id,
+        models.CastigoPendiente.tarea_id == tarea.id,
+        models.CastigoPendiente.verbo_id == datos.verbo_id,
+        models.CastigoPendiente.modo == datos.modo,
+        models.CastigoPendiente.tiempo == datos.tiempo,
+        models.CastigoPendiente.completado == False
+    ).update({"completado": True})
+
     db.commit()
-    
+
     # Obtener siguiente formulario
     siguiente = obtener_siguiente_formulario(alumno, tarea, db)
     
@@ -414,6 +424,7 @@ def guardar_castigos_pendientes(alumno_id: int, datos: schemas.GuardarCastigosPe
     ).delete()
     
     # Guardar los nuevos errores
+    castigos = []
     for error in datos.errores:
         castigo = models.CastigoPendiente(
             alumno_id=alumno_id,
@@ -427,9 +438,15 @@ def guardar_castigos_pendientes(alumno_id: int, datos: schemas.GuardarCastigosPe
             completado=False
         )
         db.add(castigo)
-    
+        castigos.append(castigo)
+
     db.commit()
-    return {"success": True}
+
+    # Devolver los castigos con su ID para que el frontend pueda marcarlos como completados
+    return {
+        "success": True,
+        "castigos": [schemas.CastigoPendiente.model_validate(c) for c in castigos]
+    }
 
 
 @router.post("/{alumno_id}/completar-castigo-individual/{castigo_id}")

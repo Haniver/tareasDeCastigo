@@ -173,19 +173,27 @@ function Task() {
         }));
         
         // Guardar en el backend
-        await guardarCastigosPendientes(alumnoId, {
+        const castigosRes = await guardarCastigosPendientes(alumnoId, {
           verbo_id: formulario.verbo_id,
           modo: formulario.modo,
           tiempo: formulario.tiempo,
           errores: erroresConId
         });
-        
+
+        // Pasar el castigo_id para que cada palabra se marque como completada al terminarla
+        const errores = castigosRes.data.castigos.map(c => ({
+          persona: c.persona,
+          respuesta_incorrecta: c.respuesta_incorrecta,
+          respuesta_correcta: c.respuesta_correcta,
+          castigo_id: c.id
+        }));
+
         // Ir a pantalla de castigo
-        navigate(`/castigo/${alumnoId}`, { 
-          state: { 
-            errores: response.data.errores,
+        navigate(`/castigo/${alumnoId}`, {
+          state: {
+            errores: errores,
             formulario: formulario
-          } 
+          }
         });
       }
       
