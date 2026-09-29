@@ -152,5 +152,5 @@ Si se modifica `nginx-tareadecastigo.conf` en el repo, hay que volver a copiarlo
 Para poner o cambiar la contraseña (pide la nueva contraseña dos veces):
 
 ```powershell
-ssh -t -i $env:USERPROFILE\.ssh	areadecastigo_ed25519 root@104.251.211.214 "sudo -u lucio /home/lucio/Proyectos/tareaDeCastigo/backend/venv/bin/python /home/lucio/Proyectos/tareaDeCastigo/backend/set_admin_password.py"
+ssh -t -i $env:USERPROFILE\.ssh\tareadecastigo_ed25519 root@104.251.211.214 "sudo -u lucio /home/lucio/Proyectos/tareaDeCastigo/backend/venv/bin/python /home/lucio/Proyectos/tareaDeCastigo/backend/set_admin_password.py"
 ```
