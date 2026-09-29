@@ -2318,3 +2318,173 @@ INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
 ((SELECT id FROM verbos WHERE infinitivo = 'dar'), 'imperativo', 'presente', 'nosotros', 'demos'),
 ((SELECT id FROM verbos WHERE infinitivo = 'dar'), 'imperativo', 'presente', 'vosotros', 'dad')
 ON CONFLICT DO NOTHING;
+
+-- Insertar verbo: "ir"
+INSERT INTO verbos (infinitivo) VALUES ('ir') ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Presente
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'yo', 'voy'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'tu', 'vas'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'el', 'va'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'nosotros', 'vamos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'vosotros', 'vais'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'presente', 'ellos', 'van')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Pretérito
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'yo', 'fui'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'tu', 'fuiste'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'el', 'fue'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'nosotros', 'fuimos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'vosotros', 'fuisteis'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'preterito', 'ellos', 'fueron')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Futuro
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'yo', 'iré'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'tu', 'irás'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'el', 'irá'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'nosotros', 'iremos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'vosotros', 'iréis'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'futuro', 'ellos', 'irán')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Copretérito (Pretérito Imperfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'yo', 'iba'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'tu', 'ibas'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'el', 'iba'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'nosotros', 'íbamos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'vosotros', 'ibais'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'copreterito', 'ellos', 'iban')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Pospretérito (Condicional)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'yo', 'iría'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'tu', 'irías'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'el', 'iría'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'nosotros', 'iríamos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'vosotros', 'iríais'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'pospreterito', 'ellos', 'irían')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Antepresente (Pretérito Perfecto Compuesto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'yo', 'he ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'tu', 'has ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'el', 'ha ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'nosotros', 'hemos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'vosotros', 'habéis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepresente', 'ellos', 'han ido')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Antepretérito (Pretérito Anterior)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'yo', 'hube ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'tu', 'hubiste ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'el', 'hubo ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'nosotros', 'hubimos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'vosotros', 'hubisteis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepreterito', 'ellos', 'hubieron ido')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Antefuturo (Futuro Perfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'yo', 'habré ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'tu', 'habrás ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'el', 'habrá ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'nosotros', 'habremos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'vosotros', 'habréis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antefuturo', 'ellos', 'habrán ido')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Antecopretérito (Pretérito Pluscuamperfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'yo', 'había ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'tu', 'habías ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'el', 'había ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'nosotros', 'habíamos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'vosotros', 'habíais ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antecopreterito', 'ellos', 'habían ido')
+ON CONFLICT DO NOTHING;
+
+-- INDICATIVO - Antepospretérito (Condicional Perfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'yo', 'habría ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'tu', 'habrías ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'el', 'habría ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'nosotros', 'habríamos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'vosotros', 'habríais ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'indicativo', 'antepospreterito', 'ellos', 'habrían ido')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Presente
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'yo', 'vaya'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'tu', 'vayas'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'el', 'vaya'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'nosotros', 'vayamos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'vosotros', 'vayáis'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'presente', 'ellos', 'vayan')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Pretérito (con formas alternativas -ra/-se)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma, forma_alternativa) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'yo', 'fuera', 'fuese'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'tu', 'fueras', 'fueses'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'el', 'fuera', 'fuese'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'nosotros', 'fuéramos', 'fuésemos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'vosotros', 'fuerais', 'fueseis'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'preterito', 'ellos', 'fueran', 'fuesen')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Futuro
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'yo', 'fuere'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'tu', 'fueres'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'el', 'fuere'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'nosotros', 'fuéremos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'vosotros', 'fuereis'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'futuro', 'ellos', 'fueren')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Antepresente (Pretérito Perfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'yo', 'haya ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'tu', 'hayas ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'el', 'haya ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'nosotros', 'hayamos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'vosotros', 'hayáis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepresente', 'ellos', 'hayan ido')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Antepretérito (Pretérito Pluscuamperfecto) con formas alternativas
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma, forma_alternativa) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'yo', 'hubiera ido', 'hubiese ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'tu', 'hubieras ido', 'hubieses ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'el', 'hubiera ido', 'hubiese ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'nosotros', 'hubiéramos ido', 'hubiésemos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'vosotros', 'hubierais ido', 'hubieseis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antepreterito', 'ellos', 'hubieran ido', 'hubiesen ido')
+ON CONFLICT DO NOTHING;
+
+-- SUBJUNTIVO - Antefuturo (Futuro Perfecto)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'yo', 'hubiere ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'tu', 'hubieres ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'el', 'hubiere ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'nosotros', 'hubiéremos ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'vosotros', 'hubiereis ido'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'subjuntivo', 'antefuturo', 'ellos', 'hubieren ido')
+ON CONFLICT DO NOTHING;
+
+-- IMPERATIVO - Presente (solo tú, nosotros, vosotros; "vamos" es la forma usual, "vayamos" también es válida)
+INSERT INTO conjugaciones (verbo_id, modo, tiempo, persona, forma, forma_alternativa) VALUES
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'imperativo', 'presente', 'tu', 've', NULL),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'imperativo', 'presente', 'nosotros', 'vamos', 'vayamos'),
+((SELECT id FROM verbos WHERE infinitivo = 'ir'), 'imperativo', 'presente', 'vosotros', 'id', NULL)
+ON CONFLICT DO NOTHING;
