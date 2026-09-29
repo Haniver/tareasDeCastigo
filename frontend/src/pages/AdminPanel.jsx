@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getVerbos, crearVerbo, actualizarVerbo, eliminarVerbo,
+  getVerbos, getVerbo, crearVerbo, actualizarVerbo, eliminarVerbo,
   getTodosGrupos, crearGrupo, actualizarGrupo, eliminarGrupo,
   getTareas, crearTarea, actualizarTarea, eliminarTarea,
   getProgresoTodos
@@ -222,8 +222,7 @@ function VerbosTab({ verbos, onRefresh, showModal, setShowModal, editingItem, se
 
   const openEditModal = async (verbo) => {
     try {
-      const response = await fetch(`/api/verbos/${verbo.id}`);
-      const data = await response.json();
+      const { data } = await getVerbo(verbo.id);
       
       // Mapear conjugaciones existentes
       const conjs = initConjugaciones();
